@@ -16,6 +16,43 @@ const Home = () => {
   const  [allposts, setAllPosts] = useState(null)
 
   const [searchText, setSearchText] = useState("")
+  const [searchedResults, setSearchedResults] = useState(null)
+  const [searchTimeout, setSearchTimeout] = useState(null)
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch('http://localhost:8080/api/v1/post', {
+          method: 'GET',
+          'Content-Type': 'application/json',
+        })
+
+        if(response.ok){
+          const result = await response.json()
+          setAllPosts(result.data.reverse())
+        }
+      } catch (error) {
+        alert(error)
+      }finally{
+        setLoading(false)
+      }
+    }
+
+    fetchPost()
+  },[])
+
+  const handleSearchChange = (e) => {
+    setSearchText(e.target.value)
+
+    setSearchTimeout(
+      setTimeout(() => {
+        const searchFilter = allposts.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()) || item.prompt.toLowerCase().includes(searchText.toLowerCase()))
+        setSearchedResults(searchFilter);
+      },500)
+    )
+    
+  }
 
   return (
     <section className='max-w-7xl mx-auto'>
@@ -26,7 +63,14 @@ const Home = () => {
         <p className='mt-2 text-[#666e75] text-[14px] max-w-[500px]'>Browse through a collection of images generated using by <span className='text-cyan-300 font-bold'>OpenAI</span>.</p>
       </div>
       <div className='mt-16'>
-        <FormField/>
+        <FormField
+          labelName="Search Post"
+          type="text"
+          name="text"
+          placeholder="Search posts"
+          value={searchText}
+          handleChange={handleSearchChange}
+        />
       </div>
 
       <div className='mt-10'>
@@ -44,9 +88,9 @@ const Home = () => {
             <div className='grid lg:grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 grid-cols-1 gap-3'>
               {
                 searchText ? (
-                  <RenderCards data={[]} title="No result found" />
+                  <RenderCards data={searchedResults} title="No result found" />
                 ) : (
-                  <RenderCards data={[]} title="No posts found"/>
+                  <RenderCards data={allposts} title="No posts found"/>
                 )
               }
             </div>
