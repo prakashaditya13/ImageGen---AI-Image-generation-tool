@@ -16,15 +16,35 @@ const CreatePost = () => {
   const [generateImg, setGenerateImg] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const generateImage = () => {
-
+  const generateImage = async () => {
+    if(form.prompt){
+      try {
+        setGenerateImg(true)
+        const response = await fetch('http://localhost:8080/api/v1/openai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({prompt: form.prompt})
+        })
+        const data = await response.json();
+        setForm({
+          ...form,
+          photo: `data:image/jpeg;base64,${data.photo}`
+        })
+      } catch (error) {
+        alert(error)
+      }finally{
+        setGenerateImg(false)
+      }
+    }else{
+      alert('Please enter the prompt')
+    }
   }
 
   const handleSubmit = () => {}
 
-  const handleChange = (e) => {
-    setForm({...form, [e.target.name]: e.target.value})
-  }
+  const handleChange = (e) => setForm({...form, [e.target.name]: e.target.value})
 
   const handleSurpriseMe = () => {
     const randomPrompt = getRandomPrompt(form.prompt)
@@ -44,16 +64,16 @@ const CreatePost = () => {
       <form className="mt-16 max-w-3xl" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-5">
           <FormField 
-            labelName="" 
+            labelName="Your Name" 
             type="text" 
-            name="" 
+            name="name" 
             placeholder="Aditya Prakash" 
             value={form.name} 
             handleChange={handleChange} />
           <FormField 
             labelName="Prompt" 
             type="text" 
-            name="John Doe" 
+            name="prompt" 
             placeholder="an armchair in the shape of an avocado" 
             value={form.prompt} 
             handleChange={handleChange} 
