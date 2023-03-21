@@ -5,6 +5,6 @@ import Post from '../mongodb/models/post.js'
 
 dotenv.config();
 
-const router = express.Router()
+const router = express.Router() 
 
 export default router
